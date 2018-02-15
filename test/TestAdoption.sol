@@ -9,42 +9,30 @@ contract TestAdoption {
     
     // Testing the addPet() function
     function testUserCanAddPet() public {
-        uint returnedId = adoption.adopt(8);
+        uint returnedId = adoption.addPet("Dog Test");
 
-        uint expected = 8;
+        uint expected = 0;
 
-        Assert.equal(returnedId, expected, "Adoption of pet ID 8 should be recorded.");
+        Assert.equal(returnedId, expected, "pet ID 0 should be recorded.");
     }
 
     // Testing the adopt() function
     function testUserCanAdoptPet() public {
-        uint returnedId = adoption.adopt(8);
+        uint returnedId = adoption.adopt(0);
 
-        uint expected = 8;
+        uint expected = 0;
 
-        Assert.equal(returnedId, expected, "Adoption of pet ID 8 should be recorded.");
+        Assert.equal(returnedId, expected, "Adoption of pet ID 0 should be recorded.");
     }
 
-    // Testing retrieval of a single pet's owner
-    function testGetAdopterAddressByPetId() public {
+    // Testing retrieval of a pet
+    function testGetPetByPetId() public {
         // Expected owner is this contract
         address expected = this;
 
-        address adopter = adoption.adopters(8);
+        var (,adopter) = adoption.getPet(0);
 
-        Assert.equal(adopter, expected, "Owner of pet ID 8 should be recorded.");
+        Assert.equal(adopter, expected, "Owner of pet ID 0 should be recorded.");
     }
-
-    // Testing retrieval of all pet owners
-    function testGetAdopterAddressByPetIdInArray() public {
-        // Expected owner is this contract
-        address expected = this;
-
-        // Store adopters in memory rather than contract's storage
-        address[16] memory adopters = adoption.getAdopters();
-
-        Assert.equal(adopters[8], expected, "Owner of pet ID 8 should be recorded.");
-    }
-
-
+    
 }

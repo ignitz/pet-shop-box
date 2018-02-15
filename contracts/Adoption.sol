@@ -9,10 +9,10 @@ contract Adoption {
         address adopter;
     }
 
-    function addPet(bytes name) returns(bool) {
+    function addPet(bytes name) returns(uint) {
         Pet memory newPet = Pet(name, address(0));
         pets.push(newPet);
-        return true;
+        return pets.length - 1;
     }
 
     // Adopting a pet
@@ -20,6 +20,7 @@ contract Adoption {
         require(petId >= 0 && petId < pets.length);
         Pet storage pet = pets[petId];
         pet.adopter = msg.sender;
+        pets[petId] = pet;
         return petId;
     }
 
