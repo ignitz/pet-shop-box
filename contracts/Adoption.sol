@@ -9,6 +9,7 @@ contract Adoption is Ownable {
     address owner;
 
     enum Status {
+        INACTIVE,
         AVAILABLE,
         PENDING_ADOPTION,
         ADOPTED
@@ -40,6 +41,42 @@ contract Adoption is Ownable {
         Pet memory newPet = Pet(name, Status.AVAILABLE, uint256(0), address(0));
         pets.push(newPet);
         return pets.length - 1;
+    }
+
+    function togglePetActive(uint petId) 
+        internal
+        returns(uint)
+    {
+        Pet storage pet = pets[petId];
+        if (pet.status == Status.AVAILABLE) {
+            pet.status = Status.INACTIVE;
+        }else if (pet.status == Status.INACTIVE) {
+            pet.status = Status.AVAILABLE;
+        }
+        pets[petId] = pet;
+        return petId;
+    }
+   
+    // activate an inactive pet
+    function activatePet(uint petId)
+        onlyOwner
+        validPet(petId)
+        hasStatus(pets[petId], Status.INACTIVE) 
+        public
+        returns(uint)
+    {
+        return togglePetActive(petId);
+    }
+
+    // inactivate an available pet
+    function inactivatePet(uint petId)
+        onlyOwner
+        validPet(petId)
+        hasStatus(pets[petId], Status.AVAILABLE) 
+        public
+        returns(uint)
+    {
+        return togglePetActive(petId); 
     }
 
     // Adopt a pet
@@ -98,14 +135,9 @@ contract Adoption is Ownable {
         validPet(petId)
         public 
         view 
-        returns(bytes, Status, uint256, address)
+        returns(bytes, address)
     {
         return (pets[petId].name, pets[petId].status, pets[petId].donation, pets[petId].adopter);
-    }
-
-    // Retrieving number of pets
-    function getPetLength() public view returns (uint) {
-        return pets.length;
     }
 
 }
