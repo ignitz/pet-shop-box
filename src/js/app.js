@@ -1,3 +1,10 @@
+Status = {
+  INACTIVE: 0,
+  AVAILABLE: 1,
+  PENDING_ADOPTION: 2,
+  ADOPTED: 3  
+};
+
 App = {
   web3Provider: null,
   web3: null,
@@ -26,21 +33,51 @@ App = {
         promises.push(adoptionInstance.getPet.call(i))
       }
 
-      Promise.all(promises).then(function(result){
-        var petsRow = $('#petsRow');
-        var petTemplate = $('#petTemplate');
-        petsRow.empty();
-      
-        for(i = 0; i < petLength; i++){
-          petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
-          petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
-          petTemplate.find('.btn-adopt').attr('data-id', i);
-          result[i][1] != '0x0000000000000000000000000000000000000000' ?
-            petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
-            petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
+          
+      App.web3.eth.getAccounts(function(error, accounts) {
+        adoptionInstance.owner.call().then(function(owner) {          
 
-          petsRow.append(petTemplate.html());
-        }
+          Promise.all(promises).then(function(result){
+            var petsRow = $('#petsRow');
+            var petTemplate = $('#petTemplate');
+            petsRow.empty();
+
+            for(i = 0; i < petLength; i++){
+              petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
+              petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
+              petTemplate.find('.btn-adopt').attr('data-id', i);
+              petTemplate.find('.btn-accept').attr('data-id', i);
+              petTemplate.find('.btn-refuse').attr('data-id', i);
+              
+              switch(result[i][1].toNumber()) {
+                case Status.INACTIVE:
+                  petTemplate.find('.btn-adopt').text('Inactive').attr('disabled', true);
+                break;
+                case Status.AVAILABLE:
+                  petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
+                break;
+                case Status.PENDING_ADOPTION:
+                  petTemplate.find('.btn-adopt').text('Pending adoption').attr('disabled', true);
+                break;
+                case Status.ADOPTED:
+                  petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true);
+                break;
+              };
+              
+              if(accounts[0] == owner && result[i][1].toNumber() == Status.PENDING_ADOPTION) {
+                petTemplate.find('.btn-accept').css('display', 'inline');
+                petTemplate.find('.btn-refuse').css('display', 'inline');
+                petTemplate.find('.btn-adopt').css('display', 'none');
+              } else {
+                petTemplate.find('.btn-accept').css('display', 'none');              
+                petTemplate.find('.btn-refuse').css('display', 'none');              
+                petTemplate.find('.btn-adopt').css('display', 'inline');              
+              }
+
+              petsRow.append(petTemplate.html());
+            }
+          });
+        });
       });
 
     }).catch(function(err) {
@@ -82,19 +119,62 @@ App = {
   bindEvents: function() {
     $(document).on('click', '.btn-adopt', App.adopt);
     $(document).on('click', '.btn-addPet', App.addPet);
-    $(document).on('click', '.btn-getPetLength', App.addPet);
+    $(document).on('click', '.btn-accept', App.acceptAdoption);
+    $(document).on('click', '.btn-refuse', App.refuseAdoption);
   },
 
-  getPetLength: function() {
+  acceptAdoption: function(event) {
+    event.preventDefault();
+    
+    var petId = parseInt($(event.target).data('id'));    
 
-    App.contracts.Adoption.deployed().then(function(instance) {
-      adoptionInstance = instance;
-      return adoptionInstance.getPetLength.call();
-    }).then(function(result) {
-      return result.c[0];
-    }).catch(function(err) {
-      console.log(err.message);
+    var adoptionInstance;
+
+    App.web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+
+      App.contracts.Adoption.deployed().then(function(instance) {
+        adoptionInstance = instance;
+
+        return adoptionInstance.acceptAdoption(petId, {from: account});
+      }).then(function(result) {
+        return App.loadPets();
+      }).catch(function(err) {
+        console.log(err.message);
+      });
     });
+
+  },
+
+  refuseAdoption: function(event) {
+    event.preventDefault();
+    
+    var petId = parseInt($(event.target).data('id'));    
+
+    var adoptionInstance;
+
+    App.web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+
+      var account = accounts[0];
+
+      App.contracts.Adoption.deployed().then(function(instance) {
+        adoptionInstance = instance;
+
+        return adoptionInstance.refuseAdoption(petId, {from: account});
+      }).then(function(result) {
+        return App.loadPets();
+      }).catch(function(err) {
+        console.log(err.message);
+      });
+    });
+
   },
 
   addPet: function() {
