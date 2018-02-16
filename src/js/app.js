@@ -35,7 +35,7 @@ App = {
           petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
           petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
           petTemplate.find('.btn-adopt').attr('data-id', i);
-          var buttonAttr = result[i][1] != '0x0000000000000000000000000000000000000000' ?
+          result[i][1] != '0x0000000000000000000000000000000000000000' ?
             petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
             petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
 
