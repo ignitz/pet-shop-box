@@ -1,40 +1,71 @@
-# Pet Shop Truffle Box
+# Ethereum workshop 2 : Adoção de animais para um Pet Shop 
 
-This box has all you need to get started with our [Pet Shop tutorial](http://truffleframework.com/tutorials/pet-shop).
+#### NOTE: Swapy Network together with Ethereum-BH Meetup Group is hosting the second Ethereum-BH Workshop in Belo Horizonte, Brazil. This repository is based on [Pet Shop tutorial](http://truffleframework.com/tutorials/pet-shop) and aims to clarify all the process of creating a decentralized application. 
 
-## Installation
+## Conteúdo
 
-1. Install Truffle globally.
-    ```javascript
-    npm install -g truffle
-    ```
+* [Introdução](#introducao)
+* [Ambiente](#ambiente)
+* [Desenvolvimento](#desenvolvimento)
+  * [Estrutura de pastas](#estrutura-de-pastas)
+  * [Escrevendo os Smart Contracts](#escrevendo-os-smart-contracts)
+  
+## Introdução
 
-2. Download the box. This also takes care of installing the necessary dependencies.
-    ```javascript
-    truffle unbox pet-shop
-    ```
+Nossa aplicação consiste em um sistema para o controle de adoções de animais em um Pet Shop e, para isso, esse tutorial aborda o processo de:
 
-3. Run the development console.
-    ```javascript
-    truffle develop
-    ```
+* Configurar o ambiente de desenvolvimento
+* Escrever os smart contracts
+* Compilar e publicar os contratos
+* Testar os contratos 
+* Criar uma interface web para o usuário
+* Interagir com o aplicativo descentralizado através do browser
 
-4. Compile and migrate the smart contracts. Note inside the development console we don't preface commands with `truffle`.
-    ```javascript
-    compile
-    migrate
-    ```
+## Ambiente
 
-5. Run the `liteserver` development server (outside the development console) for front-end hot reloading. Smart contract changes must be manually recompiled and migrated.
-    ```javascript
-    // Serves the front-end on http://localhost:3000
-    npm run dev
-    ```
+Antes de começarmos a desenvolver nossa aplicação existem alguns requisistos técnicos. Instale o que segue:
 
-**NOTE**: This box is not a complete dapp, but the starting point for the [Pet Shop tutorial](http://truffleframework.com/tutorials/pet-shop). You'll need to complete that for this to function.
+* [Node.js v6+ LTS e npm](https://nodejs.org/en/) e npm (é instalado junto com o Node)
+* [Git](https://git-scm.com/)
 
-## FAQ
+Após isso, nós precisamos somente instalar o Truffle, o framework que auxiliará no desenvolvimento do nosso DApp:
 
-* __How do I use this with the EthereumJS TestRPC?__
+```
+npm install -g truffle
+```
+Para verificar se o Truffle está instalado corretamente, digite ``` truffle version ``` no seu terminal. Caso veja algum erro, certifique-se que seus módulos npm estão visíveis nas variáveis de ambiente 
 
-    It's as easy as modifying the config file! [Check out our documentation on adding network configurations](http://truffleframework.com/docs/advanced/configuration#networks). Depending on the port you're using, you'll also need to update line 16 of `src/js/app.js`.
+Utilizaremos também a Ganache, uma blockchain privada que permite a publicação dos nossos contratos em ambiente de desenvolvimento e dará suporte para o uso e teste da nossa aplicação. Faça o download da mesma em http://truffleframework.com/ganache.
+
+## Desenvolvimento
+
+### Estrutura de pastas
+
+A estrutura inicial de pastas fornecida pelo Truffle possui:
+
+* ```contracts/```: Contém o código fonte dos nossos contratos na linguagem [Solidity](https://solidity.readthedocs.io/en/develop/)
+* ```migrations/```: Responsável por migrar nossos contratos para o ambiente desejado. O Truffle possui um sistema de controle de alterações.
+* ```test/```: Contém os testes em Javascript e Solidity
+* ```truffle.js```: Arquivo de configuração onde é descrito, por exemplo, o host dos contratos. Utilizaremos a rede local fornecida pela Ganache 
+
+Esse repositório possui outras pastas que não importam no momento e serão descritas no decorrer do tutorial.
+
+### Escrevendo os Smart Contracts
+
+Nós começaremos nosso aplicativo descentralizado escrevendo os contratos, que atuam como o "back-end" e criam a interface para o armazenamento na blockchain.
+
+Crie um novo arquivo de Adoption.sol na pasta contracts/ .
+
+Adicione esse conteúdo ao arquivo:
+
+```
+pragma solidity ^0.4.17;
+
+contract Adoption {
+
+}
+```
+Observações:
+
+* A versão mínima requerida do Solidity é descrita no ínicio do contrato: ```pragma solidity ^0.4.17;```. A palavra-chave ```pragma``` signfifica "informação adicional que importa somente ao compilador", enquanto o símbolo ```^``` significa "A versão indicada ou superior".
+* Assim como em outras linguagens, a sintaxe exige ```;``` ao final de cada comando.
