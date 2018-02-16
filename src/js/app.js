@@ -12,14 +12,13 @@ App = {
       "images/french-bulldog.jpeg",
       "images/boxer.jpeg",
       "images/golden-retriever.jpeg"
-    ]
+    ];
     
     var adoptionInstance;
     App.contracts.Adoption.deployed().then(function(instance) {
       adoptionInstance = instance;
       return adoptionInstance.getPetLength.call();
     }).then(function(result) {
-      console.log(result.c[0]);
       var petLength = result.c[0];
       var promises = [];
     
@@ -92,7 +91,6 @@ App = {
       adoptionInstance = instance;
       return adoptionInstance.getPetLength.call();
     }).then(function(result) {
-      console.log(result.c[0]);
       return result.c[0];
     }).catch(function(err) {
       console.log(err.message);
@@ -129,7 +127,6 @@ App = {
     event.preventDefault();
 
     var petId = parseInt($(event.target).data('id'));
-    console.log(petId);
 
     App.web3.eth.getAccounts(function(error, accounts) {
       if (error) {
