@@ -4,7 +4,7 @@
 
 ## Conteúdo
 
-* [Introdução](#introducao)
+* [Introdução](#introdução)
 * [Ambiente](#ambiente)
 * [Desenvolvimento](#desenvolvimento)
   * [Estrutura de pastas](#estrutura-de-pastas)
@@ -54,9 +54,10 @@ Esse repositório possui outras pastas que não importam no momento e serão des
 
 Nós começaremos nosso aplicativo descentralizado escrevendo os contratos, que atuam como o "back-end" e criam a interface para o armazenamento na blockchain.
 
-Crie um novo arquivo de Adoption.sol na pasta contracts/ .
+#### Criando o contrato e definindo a versão do compilador
+1. Crie um novo arquivo de nome ```Adoption.sol``` na pasta ```contracts/``` .
 
-Adicione esse conteúdo ao arquivo:
+2. Adicione esse conteúdo ao arquivo:
 
 ```
 pragma solidity ^0.4.17;
@@ -69,6 +70,128 @@ Observações:
 
 * A versão mínima requerida do Solidity é descrita no ínicio do contrato: ```pragma solidity ^0.4.17;```. A palavra-chave ```pragma``` signfifica "informação adicional que importa somente ao compilador", enquanto o símbolo ```^``` significa "A versão indicada ou superior".
 * Assim como em outras linguagens, a sintaxe exige ```;``` ao final de cada comando.
+
+#### Criando variáveis
+
+O Solidity é uma linguagem estaticamente tipada, isso significa que dados do tipo string, integer e array devem ser definidos. Nesse tutorial utilizaremos um tipo de variável único da linguagem, chamado ```address```. Esse tipo representa um endereço Ethereum, uma string de 20 bytes com funcionalidades específicas. Toda carteira (wallet) e smart contract possui um endereço e pode enviar Ethers através/para ele ou mesmo realizar chamadas para funções. 
+
+1. Para representar um animal a ser adotado, definiremos uma estrutura ```Pet```. Insira a Struct ```Pet``` que segue na próxima linha após ```contract Adoption {```.
+```
+    struct Pet {
+        bytes name;
+        address adopter;
+    }
+
+```
+2. Após isso, precisamos definir nossa lista de animais. Cole o código abaixo após a definição de ```Pet```:
+```
+    Pet[] public pets;
+```
+Observações:
+
+* Definimos uma única variável ```pets``` . Arrays possuem um tipo e podem ter tamanho fixo ou variável. No caso, nossa lista é do tipo ```Pet``` e possui tamanho variável.
+
+* Nossa variável é do tipo ```public```. Variáveis públicas possuem automaticamente um método getter associado a elas. Entretanto, no caso de arrays, o acesso é restrito a um item por vez, pela necessidade de passar uma chave na chamada do getter. 
+
+* #### Os modificadores ```public``` e ```private``` não referem-se à confidencialidade do dado na blockchain. Todos os dados são visíveis.
+
+#### Criando a primeira função: Adicionar um animal para adoção
+
+Vamos permitir a inserção de animais na nossa lista ```pets```.
+
+1. Adicione a seguinte função abaixo da variável que definimos anteriormente
+```
+    // adding a pet
+    function addPet(bytes name) public returns(uint) {
+        Pet memory newPet = Pet(name, address(0));
+        pets.push(newPet);
+        return pets.length - 1;
+    }
+```
+Observações:
+
+* Precisamos definir o tipo dos parâmetros e do retorno, quando existir, das funções no Solidity. Nesse caso, recebemos uma cadeia de ```bytes``` (string) que representa o nome do novo animal e retornamos um inteiro que indica o índice do novo registro na lista.
+
+* Criamos um novo registro do tipo ```Pet``` a partir do nome recebido e inicializamos o endereço do possível adotador com um valor vazio ```address(0)```, pois o mesmo ainda não está definido quando o animal é inserido para adoção.
+
+* A palavra-chave ```memory``` aparece por uma necessidade da linguagem de se explicitar que essa variável está sendo criada na memória, até o momento.
+
+* Inserimos então o animal à lista e retornamos seu índice.
+
+#### Criando a segunda função: Retornar o número total de animais 
+
+Como já foi dito ao definirmos nossa lista de animais, só conseguimos acessar os itens individualmente. Dessa forma, incluiremos uma função para saber o tamanho da nossa lista e facilitar futuros controles através da aplicação cliente.
+
+1. Adicione a seguinte função abaixo de ```addPet``, definida no passo anterior
+```
+    // Retrieving number of pets
+    function getNumberOfPets() public view returns (uint) {
+        return pets.length;
+    }
+```
+Observações:
+
+* A presença do modificador ```view``` significa que essa função não altera o estado de nenhuma variável do nosso contrato ou realiza chamadas internas a outros contratos com esse propósito.
+
+#### Criando nosso primeiro modificador de funções
+
+Ao buscar um animal e/ou agir sobre ele, precisamos checar se o índice recebido por parâmetro é compreendido no array, ou seja, se o animal existe. Aproveitaremos então um recurso do Solidity que é o ```modifier```.  
+
+1. Adicione a definição do modificador ```validPet``` acima da primeira função presente no contrato.
+```
+    modifier validPet(uint petId) {
+        require(petId >= 0 && petId < pets.length);
+        _;
+    }
+```
+Observações:
+
+* O ```require(<check>)``` é utilizado para lançar uma exceção e reverter a execução do código se ```<check>``` for falso.
+* O símbolo ```_``` serve para injetar a execução da função interceptada pelo modificador após a validação, isso será melhor entendido no passo seguinte.
+
+#### Criando nossa terceira função: Retornar os dados de um animal
+
+Vamos permitir que nossa aplicação tenha acesso aos dados de um animal inserido.
+
+1. Adicione a função descrita abaixo após a função ```addPet```.
+```
+    // Retrieving a pet
+    function getPet(uint petId) 
+        validPet(petId)
+        public 
+        view 
+        returns(bytes, address) 
+    {
+        return (pets[petId].name, pets[petId].adopter);
+    }
+```
+Observações: 
+
+* Inserimos o modificador ```validPet``` na assinatura do método, passando o índice do animal requerido. Sendo assim, ele agirá como um interceptador da função e continuará sua execução se o animal existir na lista. 
+* Tipos não primários da linguagem, como é o caso da nossa Struct ```Pet```, não conseguem ser lidos pelo client até o momento, por uma deficiência da tecnologia. Para contornar isso, precisamos retornar o animal em forma de tupla, representada por ```(pets[petId].name, pets[petId].adopter)```. Perceba que os tipos dos elementos que compõem a tupla também precisam ser descritos no retorno da função ```returns(bytes, address)```
+
+#### Criando nossa quarta função: Adotar um animal
+
+Após adicionar um animal e conseguir visualiza-lo externamente, precisamos criar a funcionalidade de adotar.
+
+1. Adicione o que segue após a declaração da função ```getPet```.
+```
+    // Adopting a pet
+    function adopt(uint petId) 
+        validPet(petId)
+        public 
+        returns (uint) 
+    {
+        Pet storage pet = pets[petId];
+        pet.adopter = msg.sender;
+        pets[petId] = pet;
+        return petId;
+    }
+```
+Observações: 
+
+* A palavra-chave ```storage``` indica que essa variável está sendo trabalhada no storage do contrato, ao contrário de ```memory```.
+* O Solidity possui uma variável global ```msg``` que é preenchida a cada transação. Utilizamos a propriedade ```msg.sender``` para pegarmos o endereço da carteira que realizou essa transação e preenchermos como o adotador do animal em questão. 
 
 
 ## Criando uma interface para interagir com o smart contract
