@@ -1,6 +1,6 @@
 # Ethereum workshop 2 : Adoção de animais para um Pet Shop 
 
-#### NOTA: Swapy Network em conjunto com o grupo de meetup Ethereum BH realizará o segundo workshop de desenvolvimento em Ethereum em Belo Horizonte, Brasil. Esse repositório basea-se no tutorial [Pet Shop tutorial](http://truffleframework.com/tutorials/pet-shop) e visa esclarecer todo o processo de desenvolvimento de uma aplicação descentralizada.
+#### NOTE: Swapy Network together with Ethereum-BH Meetup Group is hosting the second Ethereum-BH Workshop in Belo Horizonte, Brazil. This repository is based on [Pet Shop tutorial](http://truffleframework.com/tutorials/pet-shop) and aims to clarify all the process of creating a decentralized application. 
 
 ## Conteúdo
 
