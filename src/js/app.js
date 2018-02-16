@@ -24,9 +24,9 @@ App = {
     var adoptionInstance;
     App.contracts.Adoption.deployed().then(function(instance) {
       adoptionInstance = instance;
-      return adoptionInstance.getPetLength.call();
+      return adoptionInstance.getNumberOfPets.call();
     }).then(function(result) {
-      var petLength = result.c[0];
+      var petLength = result.toNumber();
       var promises = [];
     
       for(i = 0; i < petLength; i++){
@@ -43,11 +43,12 @@ App = {
             petsRow.empty();
 
             for(i = 0; i < petLength; i++){
-              petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
+              petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][1]);
               petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
               petTemplate.find('.btn-adopt').attr('data-id', i);
               petTemplate.find('.btn-accept').attr('data-id', i);
-              petTemplate.find('.btn-refuse').attr('data-id', i);
+              petTemplate.find('#adoptionValue').attr('unique-id', i);
+              petTemplate.find('#adoptionValue').css('display', 'none');
               
               switch(result[i][1].toNumber()) {
                 case Status.INACTIVE:
@@ -55,6 +56,7 @@ App = {
                 break;
                 case Status.AVAILABLE:
                   petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
+                  petTemplate.find('#adoptionValue').css('display', 'inline');
                 break;
                 case Status.PENDING_ADOPTION:
                   petTemplate.find('.btn-adopt').text('Pending adoption').attr('disabled', true);
@@ -207,6 +209,9 @@ App = {
     event.preventDefault();
 
     var petId = parseInt($(event.target).data('id'));
+    var searchString = '[unique-id=' + petId + ']';
+    var adoptionValue = $(searchString).val();
+
 
     App.web3.eth.getAccounts(function(error, accounts) {
       if (error) {
@@ -218,7 +223,7 @@ App = {
       App.contracts.Adoption.deployed().then(function(instance) {
         adoptionInstance = instance;
 
-        return adoptionInstance.adopt(petId, {from: account});
+        return adoptionInstance.adopt(petId, {from: account, value: adoptionValue});
       }).then(function(result) {
         return App.loadPets();
       }).catch(function(err) {

@@ -103,7 +103,7 @@ contract Adoption is Ownable {
         returns (uint)
     {
         Pet storage pet = pets[petId];
-        if (pet.donation > 0) {
+        if (pet.donation > uint256(0)) {
             owner.transfer(pet.donation);
         }
         pet.status = Status.ADOPTED;
@@ -120,7 +120,7 @@ contract Adoption is Ownable {
         returns (uint)
     {
         Pet storage pet = pets[petId];
-        if (pet.donation > 0) {
+        if (pet.donation > uint256(0)) {
             pet.adopter.transfer(pet.donation);
             pet.donation = uint256(0);
         }
@@ -138,6 +138,11 @@ contract Adoption is Ownable {
         returns(bytes, Status, uint256, address)
     {
         return (pets[petId].name, pets[petId].status, pets[petId].donation, pets[petId].adopter);
+    }
+
+    // Retrieving number of pets
+    function getNumberOfPets() public view returns (uint) {
+        return pets.length;
     }
 
 }
