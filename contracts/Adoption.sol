@@ -135,7 +135,7 @@ contract Adoption is Ownable {
         validPet(petId)
         public 
         view 
-        returns(bytes, address)
+        returns(bytes, Status, uint256, address)
     {
         return (pets[petId].name, pets[petId].status, pets[petId].donation, pets[petId].adopter);
     }
