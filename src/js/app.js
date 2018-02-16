@@ -3,25 +3,49 @@ App = {
   web3: null,
   contracts: {},
 
-  init: function() {
+  loadPets: function() {
     // Load pets.
-    $.getJSON('../pets.json', function(data) {
-      var petsRow = $('#petsRow');
-      var petTemplate = $('#petTemplate');
 
-      for (i = 0; i < data.length; i ++) {
-        petTemplate.find('.panel-title').text(data[i].name);
-        petTemplate.find('img').attr('src', data[i].picture);
-        petTemplate.find('.pet-breed').text(data[i].breed);
-        petTemplate.find('.pet-age').text(data[i].age);
-        petTemplate.find('.pet-location').text(data[i].location);
-        petTemplate.find('.btn-adopt').attr('data-id', data[i].id);
-
-        petsRow.append(petTemplate.html());
+    var images = [
+      "images/scottish-terrier.jpeg",
+      "images/scottish-terrier.jpeg",
+      "images/french-bulldog.jpeg",
+      "images/boxer.jpeg",
+      "images/golden-retriever.jpeg"
+    ]
+    
+    var adoptionInstance;
+    App.contracts.Adoption.deployed().then(function(instance) {
+      adoptionInstance = instance;
+      return adoptionInstance.getPetLength.call();
+    }).then(function(result) {
+      console.log(result.c[0]);
+      var petLength = result.c[0];
+      var promises = [];
+    
+      for(i = 0; i < petLength; i++){
+        promises.push(adoptionInstance.getPet.call(i))
       }
-    });
 
-    return App.initWeb3();
+      Promise.all(promises).then(function(result){
+        var petsRow = $('#petsRow');
+        var petTemplate = $('#petTemplate');
+      
+        for(i = 0; i < petLength; i++){
+          petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
+          petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
+          petTemplate.find('.btn-adopt').attr('data-id', i);
+          var buttonAttr = result[i][1] != '0x0000000000000000000000000000000000000000' ?
+            petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
+            petTemplate.find('.btn-adopt').text('Adopt');
+
+          petsRow.append(petTemplate.html());
+        }
+      });
+
+    }).catch(function(err) {
+      console.log(err.message);
+    });
   },
 
   initWeb3: function() {
@@ -49,7 +73,7 @@ App = {
       App.contracts.Adoption.setProvider(App.web3Provider);
 
       // Use our contract to retrieve and mark the adopted pets
-      return App.markAdopted();
+      return App.loadPets();
     });
 
     return App.bindEvents();
@@ -58,6 +82,7 @@ App = {
   bindEvents: function() {
     $(document).on('click', '.btn-adopt', App.handleAdopt);
     $(document).on('click', '.btn-addPet', App.addPet);
+    $(document).on('click', '.btn-getPetLength', App.addPet);
   },
 
   getPetLength: function() {
@@ -91,7 +116,7 @@ App = {
 
         return adoptionInstance.addPet(petName, {from: account});
       }).then(function(result) {
-        return App.markAdopted();
+        return App.loadPets();
       }).catch(function(err) {
         console.log(err.message);
       });
@@ -119,6 +144,6 @@ App = {
 
 $(function() {
   $(window).load(function() {
-    App.init();
+    App.initWeb3();
   });
 });
