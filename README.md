@@ -218,7 +218,7 @@ Agora que nós criamos o smart contract, fizemos o deploy para nossa blockchain 
 
 Junto com os smart contracts, nesse repositório, há uma pasta `src/` com o código para o front-end.
 
-O font-end não usa nenhum sistema de build (webpack. grunt, etc) e nenhum framework ou biblioteca javascript (Angular, React, Vue, etc) para ser o mais simples possível para começar. A estrutura do app já está disponível nessa pasta; na próxima etapa do tutorial nós vamos preencher as funções relevantes para interagir com o Ethereum. Dessa forma, você pode pegar esse conhecimento e aplicar da forma como preferir no seu *workflow*.
+O front-end não usa nenhum sistema de build (webpack. grunt, etc) e nenhum framework ou biblioteca javascript (Angular, React, Vue, etc) para ser o mais simples possível para começar. A estrutura do app já está disponível nessa pasta; na próxima etapa do tutorial nós vamos preencher as funções relevantes para interagir com o Ethereum. Dessa forma, você pode pegar esse conhecimento e aplicar da forma como preferir no seu *workflow*.
 
 ### Instanciando o web3
 
@@ -244,7 +244,7 @@ Observações:
 ### Instanciando o contrato
 Agora que nós podemos interagir com o Ethereum via web3, nós precisamos instanciar os nossos smart contracts para que o web3 saiba encontrá-lo e utilizá-lo. Nesse tutorial, estamos utilizando uma biblioteca do Truffle chamada [`truffle-contract`](https://github.com/trufflesuite/truffle-contract). Ela mantém as informações do contrato sincronizadas com as *migrations*, assim você não precisa alterar os endereços dos contratos manualmente.
 
-Nessa etapa, é interessante entender como o web3 consegue entender o smart contract e  se comunicar com ele: ao compilar o código solidity um arquivo `.json` é criado. Esse arquivo é chamado de [ABI (Application Binary Interface)](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI). Ele contém metadados do contrato, como as suas variáveis, sua funções e os respectivos tipos e retornos. Dessa forma, se o seu contrato possui a seguinte função: 
+Nessa etapa, é interessante destacar como o web3 consegue entender o smart contract e  se comunicar com ele: ao compilar o código solidity um arquivo `.json` é criado. Esse arquivo é chamado de [ABI (Application Binary Interface)](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI). Ele contém metadados do contrato, como as suas variáveis, sua funções e os respectivos tipos e retornos. Dessa forma, se o seu contrato possui a seguinte função: 
 
 ```solidity
 function sum(uint x, uint y) public returns (uint) {
@@ -487,3 +487,39 @@ O servior irá iniciar e abrir automaticamente uma nova tab no seu browser com o
 
 ![Transações do MetaMask](http://truffleframework.com/tutorials/images/pet-shop/metamask-transactionsuccess.png). 
 
+Pronto! Agora que você viu como tudo funciona na prática, vamos propor um desafio.
+
+## Parte final
+
+Agora que você já entendeu a dinâmica do desenvolvimento para Ethereum, antes de atualizar o seu LinkedIn, vamos aprofundar um pouco mais o conhecimento com alguns desafios.
+
+### Desafio 1
+Implemente a opção de adicionar uma doação opcional ao adotar o pet.
+
+Cuidar de animais não é barato... há gastos com veterinário, comida, etc. Por isso, seria interessante adicionar a opção de incluir um valor em Ether ao realizar a adoção.
+
+Funções envolvendo transferência de Ether são muito importantes, por isso, tente criar essa nova funcionalidade!
+
+>Dica: utilize uma função payable
+
+### Desafio 2
+Implemente a funcionalidade de aceitar/recusar a adoção de um pet.
+
+Essa atividade é um pouco mais desafiadora! Será necessário implementar um controle de estados para cada pet.
+
+O fluxo deve ser o seguinte:
+
+1. O usuário vai solicitar a adoção e incluir um valor em Ether (pode ser 0)
+2. O dono do petshop vai aceitar a adoção e retirar o valor em Ether ou recusar a adoção e devolver o valor.
+
+Observações:
+- Um pet não pode ser adotado duas vezes.
+- Somente o dono do petshop pode adicionar pet e aceitar/recusar as adoções.
+
+### Desafio 3
+Implemente um log de adoções no smart contract. Toda vez que um pet for adotado emita um evento que poderá ser lido no frontend.
+
+Bônus:
+- Implemente uma página de log no frontend. 
+
+> Dica: utilize event no solidity
