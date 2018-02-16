@@ -30,6 +30,7 @@ App = {
       Promise.all(promises).then(function(result){
         var petsRow = $('#petsRow');
         var petTemplate = $('#petTemplate');
+        petsRow.empty();
       
         for(i = 0; i < petLength; i++){
           petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
@@ -37,7 +38,7 @@ App = {
           petTemplate.find('.btn-adopt').attr('data-id', i);
           var buttonAttr = result[i][1] != '0x0000000000000000000000000000000000000000' ?
             petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
-            petTemplate.find('.btn-adopt').text('Adopt');
+            petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
 
           petsRow.append(petTemplate.html());
         }
