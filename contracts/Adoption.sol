@@ -29,4 +29,9 @@ contract Adoption {
         return (pets[petId].name, pets[petId].adopter);
     }
 
+    // Retrieving number of pets
+    function getPetLength() public returns (uint) {
+        return pets.length;
+    }
+
 }
