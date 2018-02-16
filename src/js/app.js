@@ -1,68 +1,58 @@
 App = {
   web3Provider: null,
+  web3: null,
   contracts: {},
-
-  init: function() {
-    // Load pets.
-    $.getJSON('../pets.json', function(data) {
-      var petsRow = $('#petsRow');
-      var petTemplate = $('#petTemplate');
-
-      for (i = 0; i < data.length; i ++) {
-        petTemplate.find('.panel-title').text(data[i].name);
-        petTemplate.find('img').attr('src', data[i].picture);
-        petTemplate.find('.pet-breed').text(data[i].breed);
-        petTemplate.find('.pet-age').text(data[i].age);
-        petTemplate.find('.pet-location').text(data[i].location);
-        petTemplate.find('.btn-adopt').attr('data-id', data[i].id);
-
-        petsRow.append(petTemplate.html());
-      }
-    });
-
-    return App.initWeb3();
-  },
+  images: [
+    "images/scottish-terrier.jpeg",
+    "images/scottish-terrier.jpeg",
+    "images/french-bulldog.jpeg",
+    "images/boxer.jpeg",
+    "images/golden-retriever.jpeg"
+  ],
 
   initWeb3: function() {
-    /*
-     * Replace me...
+    /* 
+     * Substitua esse bloco de comentário
      */
 
-    return App.initContract();
   },
 
   initContract: function() {
-    /*
-     * Replace me...
+    /* 
+     * Substitua esse bloco de comentário
      */
 
-    return App.bindEvents();
   },
 
   bindEvents: function() {
-    $(document).on('click', '.btn-adopt', App.handleAdopt);
+    $(document).on('click', '.btn-adopt', App.adopt);
+    $(document).on('click', '#add-pet', App.addPet);
   },
 
-  markAdopted: function(adopters, account) {
-    /*
-     * Replace me...
+  loadPets: function() {
+    /* 
+     * Substitua esse bloco de comentário
      */
+
   },
 
-  handleAdopt: function(event) {
-    event.preventDefault();
-
-    var petId = parseInt($(event.target).data('id'));
-
-    /*
-     * Replace me...
+  addPet: function(event) {
+    /* 
+     * Substitua esse bloco de comentário
      */
+
+  },
+
+  adopt: function(event) {
+    /* 
+     * Substitua esse bloco de comentário
+     */
+
   }
-
 };
 
 $(function() {
   $(window).load(function() {
-    App.init();
+    App.initWeb3();
   });
 });

@@ -4,11 +4,28 @@
 
 ## Conteúdo
 
-* [Introdução](#introducao)
-* [Ambiente](#ambiente)
-* [Desenvolvimento](#desenvolvimento)
-  * [Estrutura de pastas](#estrutura-de-pastas)
-  * [Escrevendo os Smart Contracts](#escrevendo-os-smart-contracts)
+- [Introdução](#introdu%C3%A7%C3%A3o)
+- [Ambiente](#ambiente)
+- [Desenvolvimento](#desenvolvimento)
+  - [Estrutura de pastas](#estrutura-de-pastas)
+  - [Escrevendo os Smart Contracts](#escrevendo-os-smart-contracts)
+    - [Criando o contrato e definindo a versão do compilador](#criando-o-contrato-e-definindo-a-vers%C3%A3o-do-compilador)
+    - [Criando variáveis](#criando-vari%C3%A1veis)
+    - [Criando a primeira função: Adicionar um animal para adoção](#criando-a-primeira-fun%C3%A7%C3%A3o-adicionar-um-animal-para-ado%C3%A7%C3%A3o)
+    - [Criando a segunda função: Retornar o número total de animais](#criando-a-segunda-fun%C3%A7%C3%A3o-retornar-o-n%C3%BAmero-total-de-animais)
+    - [Criando nosso primeiro modificador de funções](#criando-nosso-primeiro-modificador-de-fun%C3%A7%C3%B5es)
+    - [Criando nossa terceira função: Retornar os dados de um animal](#criando-nossa-terceira-fun%C3%A7%C3%A3o-retornar-os-dados-de-um-animal)
+    - [Criando nossa quarta função: Adotar um animal](#criando-nossa-quarta-fun%C3%A7%C3%A3o-adotar-um-animal)
+- [Criando uma interface para interagir com o smart contract](#criando-uma-interface-para-interagir-com-o-smart-contract)
+  - [Instanciando o web3](#instanciando-o-web3)
+  - [Instanciando o contrato](#instanciando-o-contrato)
+  - [Consultando os pets adotados e atualizando a UI](#consultando-os-pets-adotados-e-atualizando-a-ui)
+  - [Adicionando um novo pet](#adicionando-um-novo-pet)
+  - [Adotando um pet](#adotando-um-pet)
+- [Interagindo com o dapp no browser](#interagindo-com-o-dapp-no-browser)
+  - [Instalando e configurando o MetaMask](#instalando-e-configurando-o-metamask)
+- [Iniciando o servidor http local](#iniciando-o-servidor-http-local)
+- [Usando o dapp](#usando-o-dapp)
   
 ## Introdução
 
@@ -54,9 +71,10 @@ Esse repositório possui outras pastas que não importam no momento e serão des
 
 Nós começaremos nosso aplicativo descentralizado escrevendo os contratos, que atuam como o "back-end" e criam a interface para o armazenamento na blockchain.
 
-Crie um novo arquivo de Adoption.sol na pasta contracts/ .
+#### Criando o contrato e definindo a versão do compilador
+1. Crie um novo arquivo de nome ```Adoption.sol``` na pasta ```contracts/``` .
 
-Adicione esse conteúdo ao arquivo:
+2. Adicione esse conteúdo ao arquivo:
 
 ```
 pragma solidity ^0.4.17;
@@ -69,6 +87,128 @@ Observações:
 
 * A versão mínima requerida do Solidity é descrita no ínicio do contrato: ```pragma solidity ^0.4.17;```. A palavra-chave ```pragma``` signfifica "informação adicional que importa somente ao compilador", enquanto o símbolo ```^``` significa "A versão indicada ou superior".
 * Assim como em outras linguagens, a sintaxe exige ```;``` ao final de cada comando.
+
+#### Criando variáveis
+
+O Solidity é uma linguagem estaticamente tipada, isso significa que dados do tipo string, integer e array devem ser definidos. Nesse tutorial utilizaremos um tipo de variável único da linguagem, chamado ```address```. Esse tipo representa um endereço Ethereum, uma string de 20 bytes com funcionalidades específicas. Toda carteira (wallet) e smart contract possui um endereço e pode enviar Ethers através/para ele ou mesmo realizar chamadas para funções. 
+
+1. Para representar um animal a ser adotado, definiremos uma estrutura ```Pet```. Insira a Struct ```Pet``` que segue na próxima linha após ```contract Adoption {```.
+```
+    struct Pet {
+        bytes name;
+        address adopter;
+    }
+
+```
+2. Após isso, precisamos definir nossa lista de animais. Cole o código abaixo após a definição de ```Pet```:
+```
+    Pet[] public pets;
+```
+Observações:
+
+* Definimos uma única variável ```pets``` . Arrays possuem um tipo e podem ter tamanho fixo ou variável. No caso, nossa lista é do tipo ```Pet``` e possui tamanho variável.
+
+* Nossa variável é do tipo ```public```. Variáveis públicas possuem automaticamente um método getter associado a elas. Entretanto, no caso de arrays, o acesso é restrito a um item por vez, pela necessidade de passar uma chave na chamada do getter. 
+
+* #### Os modificadores ```public``` e ```private``` não referem-se à confidencialidade do dado na blockchain. Todos os dados são visíveis.
+
+#### Criando a primeira função: Adicionar um animal para adoção
+
+Vamos permitir a inserção de animais na nossa lista ```pets```.
+
+1. Adicione a seguinte função abaixo da variável que definimos anteriormente
+```
+    // adding a pet
+    function addPet(bytes name) public returns(uint) {
+        Pet memory newPet = Pet(name, address(0));
+        pets.push(newPet);
+        return pets.length - 1;
+    }
+```
+Observações:
+
+* Precisamos definir o tipo dos parâmetros e do retorno, quando existir, das funções no Solidity. Nesse caso, recebemos uma cadeia de ```bytes``` (string) que representa o nome do novo animal e retornamos um inteiro que indica o índice do novo registro na lista.
+
+* Criamos um novo registro do tipo ```Pet``` a partir do nome recebido e inicializamos o endereço do possível adotador com um valor vazio ```address(0)```, pois o mesmo ainda não está definido quando o animal é inserido para adoção.
+
+* A palavra-chave ```memory``` aparece por uma necessidade da linguagem de se explicitar que essa variável está sendo criada na memória, até o momento.
+
+* Inserimos então o animal à lista e retornamos seu índice.
+
+#### Criando a segunda função: Retornar o número total de animais 
+
+Como já foi dito ao definirmos nossa lista de animais, só conseguimos acessar os itens individualmente. Dessa forma, incluiremos uma função para saber o tamanho da nossa lista e facilitar futuros controles através da aplicação cliente.
+
+1. Adicione a seguinte função abaixo de ```addPet``, definida no passo anterior
+```
+    // Retrieving number of pets
+    function getNumberOfPets() public view returns (uint) {
+        return pets.length;
+    }
+```
+Observações:
+
+* A presença do modificador ```view``` significa que essa função não altera o estado de nenhuma variável do nosso contrato ou realiza chamadas internas a outros contratos com esse propósito.
+
+#### Criando nosso primeiro modificador de funções
+
+Ao buscar um animal e/ou agir sobre ele, precisamos checar se o índice recebido por parâmetro é compreendido no array, ou seja, se o animal existe. Aproveitaremos então um recurso do Solidity que é o ```modifier```.  
+
+1. Adicione a definição do modificador ```validPet``` acima da primeira função presente no contrato.
+```
+    modifier validPet(uint petId) {
+        require(petId >= 0 && petId < pets.length);
+        _;
+    }
+```
+Observações:
+
+* O ```require(<check>)``` é utilizado para lançar uma exceção e reverter a execução do código se ```<check>``` for falso.
+* O símbolo ```_``` serve para injetar a execução da função interceptada pelo modificador após a validação, isso será melhor entendido no passo seguinte.
+
+#### Criando nossa terceira função: Retornar os dados de um animal
+
+Vamos permitir que nossa aplicação tenha acesso aos dados de um animal inserido.
+
+1. Adicione a função descrita abaixo após a função ```addPet```.
+```
+    // Retrieving a pet
+    function getPet(uint petId) 
+        validPet(petId)
+        public 
+        view 
+        returns(bytes, address) 
+    {
+        return (pets[petId].name, pets[petId].adopter);
+    }
+```
+Observações: 
+
+* Inserimos o modificador ```validPet``` na assinatura do método, passando o índice do animal requerido. Sendo assim, ele agirá como um interceptador da função e continuará sua execução se o animal existir na lista. 
+* Tipos não primários da linguagem, como é o caso da nossa Struct ```Pet```, não conseguem ser lidos pelo client até o momento, por uma deficiência da tecnologia. Para contornar isso, precisamos retornar o animal em forma de tupla, representada por ```(pets[petId].name, pets[petId].adopter)```. Perceba que os tipos dos elementos que compõem a tupla também precisam ser descritos no retorno da função ```returns(bytes, address)```
+
+#### Criando nossa quarta função: Adotar um animal
+
+Após adicionar um animal e conseguir visualiza-lo externamente, precisamos criar a funcionalidade de adotar.
+
+1. Adicione o que segue após a declaração da função ```getPet```.
+```
+    // Adopting a pet
+    function adopt(uint petId) 
+        validPet(petId)
+        public 
+        returns (uint) 
+    {
+        Pet storage pet = pets[petId];
+        pet.adopter = msg.sender;
+        pets[petId] = pet;
+        return petId;
+    }
+```
+Observações: 
+
+* A palavra-chave ```storage``` indica que essa variável está sendo trabalhada no storage do contrato, ao contrário de ```memory```.
+* O Solidity possui uma variável global ```msg``` que é preenchida a cada transação. Utilizamos a propriedade ```msg.sender``` para pegarmos o endereço da carteira que realizou essa transação e preenchermos como o adotador do animal em questão. 
 
 
 ## Criando uma interface para interagir com o smart contract
@@ -133,8 +273,10 @@ $.getJSON('Adoption.json', function(data) {
   App.contracts.Adoption.setProvider(App.web3Provider);
 
   // Use our contract to retrieve and mark the adopted pets
-  return App.markAdopted();
+  return App.loadPets();
 });
+
+return App.bindEvents();
 ```
 
 Observações:
@@ -142,40 +284,132 @@ Observações:
 - Primeiro pegamos a ABI do contrato.
 - Após recebermos o JSON no callback, nós o passamos para `TruffleContract()`. Isso irá criar a instância do contrato com a qual podemos interagir.
 - Com o nosso contrato instanciado, nós setamos o seu *web3 provider* usando o `App.web3Provider` que havíamos iniciado quando configuramos o web3.
-- Depois nós chamamos a função `markAdopted()` para marcar os pets que ja foram adotados anteriormente. Nós encapsulamos isso em uma função separada já que vamos precisar de atualizar a UI toda vez que fizermos alguma modificação na blockchain.
+- Depois nós chamamos a função `loadPets()` para carregar os pets que ja foram cadastrados anteriormente. Nós encapsulamos isso em uma função separada já que vamos precisar de atualizar a UI toda vez que fizermos alguma modificação na blockchain.
 
 ### Consultando os pets adotados e atualizando a UI
 
-1. Ainda em `src/js/app.js`, remova o bloco de comentário em `markAdopted` e altere para:
+1. Ainda em `src/js/app.js`, remova o bloco de comentário em `loadPets` e altere para:
 
 ```javascript
+   var adoptionInstance;
+    App.contracts.Adoption.deployed().then(function(instance) {
+      adoptionInstance = instance;
+      return adoptionInstance.getNumberOfPets.call();
+    }).then(function(res) {
+      var numberOfPets = res.toNumber(); // number of pets is a BigNumber
+
+      if (numberOfPets > 0) {
+        $('#add-one').hide();
+        $('.btn-addPet').show();
+
+        var promises = [];
+      
+        for(i = 0; i < numberOfPets; i++) {
+          promises.push(adoptionInstance.getPet.call(i))
+        }
+  
+        Promise.all(promises).then(function(result) {
+          var petsRow = $('#petsRow');
+          var petTemplate = $('#petTemplate');
+          petsRow.empty();
+        
+          for(i = 0; i < numberOfPets; i++) {
+            petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
+            petTemplate.find('img').attr('src', App.images[Math.floor(Math.random() * App.images.length)]);
+            petTemplate.find('.btn-adopt').attr('data-id', i);
+            result[i][1] != '0x0000000000000000000000000000000000000000' ?
+              petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
+              petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
+  
+            petsRow.append(petTemplate.html());
+          }
+        });
+      } else {
+        $('.btn-addPet').hide();
+        $('#add-one').show();
+      }
+    }).catch(function(err) {
+      console.log(err.message);
+    });
+```
+
+Observações:
+- Nós acessamos o contrato `Adoption` que foi feito deploy em nossa blockchain local e chamamos `getNumberOfPets` nessa instância.
+- Primeiro, nós declaramos a variável `adoptionInstance` fora da chamada do smart contract, para que possamos acessar a instância depois de recuperá-la da blockchain.
+- Usar a função `call()` nos permite ler os dados da blockchain sem alterar o seu estado, ou seja, sem enviar uma "transação completa". Dessa forma, não gastamos gas.
+- Após chamar `getNumberOfPets()`, nós fazemos um loop e chamamos a função `getPet()` para buscar os dados de cada pet.
+- Por padrão, os valores são instanciados com um endereço vazio no Solidity, portanto quando o valor retornado é um endereço diferente de `0x0000000000000000000000000000000000000000`, sabemos que há um endereço e portanto o pet foi adotado.
+
+### Adicionando um novo pet
+Inicialmente, o nosso contrato não possui nenhum pet cadastrado, portanto precisamos adicionar. Para isso vamos usar a função `addPet` do contrato.
+
+1. Ainda em `src/js/app.js`, substitua o bloco de comentário pelo seguinte código:
+
+```javascript
+event.stopPropagation();
+var petName = $('#petName').val();
+
 var adoptionInstance;
-
-App.contracts.Adoption.deployed().then(function(instance) {
-  adoptionInstance = instance;
-
-  return adoptionInstance.getAdopters.call();
-}).then(function(adopters) {
-  for (i = 0; i < adopters.length; i++) {
-    if (adopters[i] !== '0x0000000000000000000000000000000000000000') {
-      $('.panel-pet').eq(i).find('button').text('Success').attr('disabled', true);
-    }
+App.web3.eth.getAccounts(function(error, accounts) {
+  if (error) {
+    console.log(error);
   }
-}).catch(function(err) {
-  console.log(err.message);
+
+  var account = accounts[0];
+
+  App.contracts.Adoption.deployed().then(function(instance) {
+    adoptionInstance = instance;
+
+    return adoptionInstance.addPet(petName, { from: account });
+  }).then(function(result) {
+    $('#addPetModal').modal('hide');
+    setTimeout(function() {
+      return App.loadPets();
+    }, 3000);
+  }).catch(function(err) {
+    console.log(err.message);
+  });
 });
 ```
 
 Observações:
-- Nós acessamos o contrato `Adoption` que foi feito deploy em nossa blockchain local e chamamos `getAdopters` nessa instância.
-- Primeiro, nós declaramos a variável `adoptionInstance` fora da chamada do smart contract, para que possamos acessar a instância depois de recuperá-la da blockchain.
-- Usar a função `call()` nos permite ler os dados da blockchain sem alterar o seu estado, ou seja, sem enviar uma "transação completa". Dessa forma, não gastamos gas.
-- Após chamar `getAdopters()`, nós fazemos um loop para checar se há algum endereço correspondente a posição.
-- Quando há ....
+- Essa operação irá escrever no nosso smart contract, logo é necessário enviar uma transação completa e assinada. Para isso precisamos da chave privada e de Ether para pagar o gas. Com o MetaMask, não precisamos lidar diretamente com a chave privada do usuário, basta informar qual o endereço a ser utilizado pela transação e internamente a extensão cuidará da assinatura.
+- `web3.eth.getAccounts` retorna as contas presentes no web3. Como dito acima, o MetaMask seta automaticamente a conta selecionada.
+- `adoptionInstance.addPet(petName, { from: account })` chama a função do smart contract, assinando com o endereço `from`.
+- Observe que no retorno, utilizamos um `setTimeout`. Ele foi utilizado com propósito didático para simular o tempo de resposta da blockchain. 
 
-### Função adopt()
 
-....
+### Adotando um pet
+
+1. Novamente em `src/js/app.js`, substitua o bloco de comentário pelo seguinte código:
+
+```javascript
+event.preventDefault();
+
+var petId = parseInt($(event.target).data('id'));
+
+App.web3.eth.getAccounts(function(error, accounts) {
+  if (error) {
+    console.log(error);
+  }
+
+  var account = accounts[0];
+
+  App.contracts.Adoption.deployed().then(function(instance) {
+    adoptionInstance = instance;
+
+    return adoptionInstance.adopt(petId, {from: account});
+  }).then(function(result) {
+    setTimeout(function() {
+      return App.loadPets();
+    }, 2000);
+  }).catch(function(err) {
+    console.log(err.message);
+  });
+});
+```
+
+Ok! O seu frontend já está pronto para ser utilizado.
 
 ## Interagindo com o dapp no browser
 
@@ -242,13 +476,13 @@ Para iniciá-lo utilize o comando `npm run dev`.
 
 O servior irá iniciar e abrir automaticamente uma nova tab no seu browser com o dapp.
 
-![Pet Shop](http://truffleframework.com/tutorials/images/pet-shop/dapp.png)
+2. Clique em **add one**, coloque o nome do novo pet e clique no botão **Add pet**
 
-Automaticamente, o MetaMask irá abrir um popup contendo informações sobre a transação a ser feita. Clique em **Submit** para aprovar a transação.
+3. Automaticamente, o MetaMask irá abrir um popup contendo informações sobre a transação a ser feita. Clique em **Submit** para aprovar a transação.
 
 ![Informações da transação](http://truffleframework.com/tutorials/images/pet-shop/metamask-transactionconfirm.png)
 
-Após isso, você verá a transação listada na sua conta do MetaMask
+4. Após isso, você verá a transação listada na sua conta do MetaMask
 
 ![Transações do MetaMask](http://truffleframework.com/tutorials/images/pet-shop/metamask-transactionsuccess.png). 
 
