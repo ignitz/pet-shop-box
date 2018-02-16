@@ -43,7 +43,7 @@ App = {
             petsRow.empty();
 
             for(i = 0; i < petLength; i++){
-              petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][1]);
+              petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
               petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
               petTemplate.find('.btn-adopt').attr('data-id', i);
               petTemplate.find('.btn-accept').attr('data-id', i);
