@@ -209,7 +209,82 @@ Após adicionar um animal e conseguir visualiza-lo externamente, precisamos cria
 Observações: 
 
 * A palavra-chave ```storage``` indica que essa variável está sendo trabalhada no storage do contrato, ao contrário de ```memory```.
-* O Solidity possui uma variável global ```msg``` que é preenchida a cada transação. Utilizamos a propriedade ```msg.sender``` para pegarmos o endereço da carteira que realizou essa transação e preenchermos como o adotador do animal em questão. 
+* O Solidity possui uma variável global ```msg``` que é preenchida a cada transação. Utilizamos a propriedade ```msg.sender``` para pegarmos o endereço da carteira que realizou essa transação e preenchermos como o adotador do animal em questão.
+
+## Compilando e publicando os contratos
+
+Agora que já desenvolvemos o contrato, os próximos passos são compilar e publicar na nossa rede local.
+
+A partir desse momento utilizaremos o Truffle, que possui um console de desenvolvimento embutido com funções que nos auxiliam nos testes, compilação e publicação.
+
+### Compilando o contrato
+
+O Solidity é uma linguagem compilada, o que significa que temos que transformar nosso contrato em bytecodes para que EVM (Máquina virtual Ethereum) consiga executa-lo.
+
+1. Navegue até a pasta raiz do projeto e digite o comando
+```
+truffle compile
+```
+O resultado deve ser parecido com o que segue
+```
+Compiling ./contracts/Migrations.sol...
+Compiling ./contracts/Adoption.sol...
+Writing artifacts to ./build/contracts
+```
+
+### Publicando o contrato
+
+Após compilarmos nosso contrato, resta agora publica-lo na blockchain!
+
+1. Navegue até a pasta ```migrations/```, você deve ver um arquivo JavaScript ```1_initial_migration.js```
+2. Crie um arquivo de nome ```2_deploy_contracts.js``` nesse mesmo diretório.
+3. Adicione o conteúdo que segue no arquivo criado anteriormente
+```
+var Adoption = artifacts.require("Adoption");
+
+module.exports = function(deployer) {
+  deployer.deploy(Adoption);
+};
+```
+4. Antes de publicarmos nosso contrato, precisamos que a nossa blockchain local esteja rodando. 
+Como dito na configuração do ambiente, utilizaremos a Ganache como blockchain de desenvolvimento.
+Certifique-se que ela está instalada em sua máquina e dê um clique duplo em seu ícone. Após isso, ela iniciará e criará nossa rede local na porta 7545.
+
+![Ganache](http://truffleframework.com/tutorials/images/pet-shop/ganache-initial.png)
+
+5. Voltando ao terminal, digite o comando
+
+```
+truffle migrate
+```
+O resultado deve ser parecido com o que segue
+```
+Using network 'development'.
+
+Running migration: 1_initial_migration.js
+  Deploying Migrations...
+  ... 0xcc1a5aea7c0a8257ba3ae366b83af2d257d73a5772e84393b0576065bf24aedf
+  Migrations: 0x8cdaf0cd259887258bc13a92c0a6da92698644c0
+Saving successful migration to network...
+  ... 0xd7bc86d31bee32fa3988f1c1eabce403a1b5d570340a3a9cdba53a472ee8c956
+Saving artifacts...
+Running migration: 2_deploy_contracts.js
+  Deploying Adoption...
+  ... 0x43b6a6888c90c38568d4f9ea494b9e2a22f55e506a8197938fb1bb6e5eaa5d34
+  Adoption: 0x345ca3e014aaf5dca488057592ee47305d9b3e10
+Saving successful migration to network...
+  ... 0xf36163615f41ef7ed8f4a8f192149a0bf633fe1a2398ce001bf44c43dc7bdda0
+Saving artifacts...
+```
+Ao lado do nome de cada contrato temos o endereço dele na rede.
+
+6. Na Ganache, note que o estado da blockchain alterou. Agora a rede mostra que o bloco atual é o 4, e não mais o 0. Além disso, verificamos que o saldo anterior de 100 Ethers foi reduzido, devido ao custo para realizar transações na rede (GAS).
+
+![Ganache2](http://truffleframework.com/tutorials/images/pet-shop/ganache-migrated.png)
+
+Agora que temos nosso contrato disponível na blockchain, é o momento de interagirmos com ele.
+
+## Testando o contrato
 
 
 ## Criando uma interface para interagir com o smart contract
