@@ -9,7 +9,7 @@ contract Adoption {
         address adopter;
     }
 
-    function addPet(bytes name) returns(uint) {
+    function addPet(bytes name) public returns(uint) {
         Pet memory newPet = Pet(name, address(0));
         pets.push(newPet);
         return pets.length - 1;
@@ -30,7 +30,7 @@ contract Adoption {
     }
 
     // Retrieving number of pets
-    function getPetLength() public returns (uint) {
+    function getNumberOfPets() public view returns (uint) {
         return pets.length;
     }
 

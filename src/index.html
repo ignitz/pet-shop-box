@@ -20,17 +20,16 @@
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-xs-12 col-sm-8 col-sm-push-2">
-          <h1 class="text-center">Pete's Pet Shop</h1>
+        <div class="col-xs-12 col-sm-8 col-sm-push-2 text-center">
+          <h1>Pet Shop</h1>
           <hr/>
           <br/>
+          <button class="btn btn-default btn-addPet text-center" data-toggle="modal" data-target="#addPetModal" type="button" data-id="0">Add pet</button>
         </div>
       </div>
-      <div>
-        <input type="text" name="petName" id="petName"/>
-        <button class="btn btn-default btn-addPet" type="button" data-id="0">Add pet</button>
-      </div>
-      <div id="petsRow" class="row">
+
+      <h3 id="add-one" class="text-center">There's no pets in your PetShop. Why don't you <a data-toggle="modal" data-target="#addPetModal"> add one</a>?</h3>
+      <div id="petsRow" style="padding-top: 20px" class="row">
         <!-- PETS LOAD HERE -->
       </div>
     </div>
@@ -49,6 +48,27 @@
         </div>
       </div>
     </div>
+
+
+    <div class="modal fade" id="addPetModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Add pet</h4>
+          </div>
+          <div class="modal-body">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Pet Name" aria-describedby="" name="petName" id="petName">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" id="add-pet" class="btn btn-primary">Add pet</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>

@@ -2,51 +2,13 @@ App = {
   web3Provider: null,
   web3: null,
   contracts: {},
-
-  loadPets: function() {
-    // Load pets.
-
-    var images = [
-      "images/scottish-terrier.jpeg",
-      "images/scottish-terrier.jpeg",
-      "images/french-bulldog.jpeg",
-      "images/boxer.jpeg",
-      "images/golden-retriever.jpeg"
-    ];
-    
-    var adoptionInstance;
-    App.contracts.Adoption.deployed().then(function(instance) {
-      adoptionInstance = instance;
-      return adoptionInstance.getPetLength.call();
-    }).then(function(result) {
-      var petLength = result.c[0];
-      var promises = [];
-    
-      for(i = 0; i < petLength; i++){
-        promises.push(adoptionInstance.getPet.call(i))
-      }
-
-      Promise.all(promises).then(function(result){
-        var petsRow = $('#petsRow');
-        var petTemplate = $('#petTemplate');
-        petsRow.empty();
-      
-        for(i = 0; i < petLength; i++){
-          petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
-          petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
-          petTemplate.find('.btn-adopt').attr('data-id', i);
-          result[i][1] != '0x0000000000000000000000000000000000000000' ?
-            petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
-            petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
-
-          petsRow.append(petTemplate.html());
-        }
-      });
-
-    }).catch(function(err) {
-      console.log(err.message);
-    });
-  },
+  images: [
+    "images/scottish-terrier.jpeg",
+    "images/scottish-terrier.jpeg",
+    "images/french-bulldog.jpeg",
+    "images/boxer.jpeg",
+    "images/golden-retriever.jpeg"
+  ],
 
   initWeb3: function() {
 
@@ -81,28 +43,58 @@ App = {
 
   bindEvents: function() {
     $(document).on('click', '.btn-adopt', App.adopt);
-    $(document).on('click', '.btn-addPet', App.addPet);
-    $(document).on('click', '.btn-getPetLength', App.addPet);
+    $(document).on('click', '#add-pet', App.addPet);
   },
 
-  getPetLength: function() {
+  loadPets: function() {
 
+    var adoptionInstance;
     App.contracts.Adoption.deployed().then(function(instance) {
       adoptionInstance = instance;
-      return adoptionInstance.getPetLength.call();
-    }).then(function(result) {
-      return result.c[0];
+      return adoptionInstance.getNumberOfPets.call();
+    }).then(function(res) {
+      var numberOfPets = res.toNumber(); // number of pets is a BigNumber
+
+      if (numberOfPets > 0) {
+        $('#add-one').hide();
+        $('.btn-addPet').show();
+
+        var promises = [];
+      
+        for(i = 0; i < numberOfPets; i++) {
+          promises.push(adoptionInstance.getPet.call(i))
+        }
+  
+        Promise.all(promises).then(function(result) {
+          var petsRow = $('#petsRow');
+          var petTemplate = $('#petTemplate');
+          petsRow.empty();
+        
+          for(i = 0; i < numberOfPets; i++) {
+            petTemplate.find('.panel-title').text(App.web3.toAscii(result[i][0]));
+            petTemplate.find('img').attr('src', App.images[Math.floor(Math.random() * App.images.length)]);
+            petTemplate.find('.btn-adopt').attr('data-id', i);
+            result[i][1] != '0x0000000000000000000000000000000000000000' ?
+              petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true) :
+              petTemplate.find('.btn-adopt').text('Adopt').attr('disabled', false);
+  
+            petsRow.append(petTemplate.html());
+          }
+        });
+      } else {
+        $('.btn-addPet').hide();
+        $('#add-one').show();
+      }
     }).catch(function(err) {
       console.log(err.message);
     });
   },
 
-  addPet: function() {
-
+  addPet: function(event) {
+    event.stopPropagation();
     var petName = $('#petName').val();
 
     var adoptionInstance;
-
     App.web3.eth.getAccounts(function(error, accounts) {
       if (error) {
         console.log(error);
@@ -113,14 +105,16 @@ App = {
       App.contracts.Adoption.deployed().then(function(instance) {
         adoptionInstance = instance;
 
-        return adoptionInstance.addPet(petName, {from: account});
+        return adoptionInstance.addPet(petName, { from: account });
       }).then(function(result) {
-        return App.loadPets();
+        $('#addPetModal').modal('hide');
+        setTimeout(function() {
+          return App.loadPets();
+        }, 3000);
       }).catch(function(err) {
         console.log(err.message);
       });
     });
-
   },
 
   adopt: function(event) {
@@ -140,13 +134,14 @@ App = {
 
         return adoptionInstance.adopt(petId, {from: account});
       }).then(function(result) {
-        return App.loadPets();
+        setTimeout(function() {
+          return App.loadPets();
+        }, 2000);
       }).catch(function(err) {
         console.log(err.message);
       });
     });
   }
-
 };
 
 $(function() {
