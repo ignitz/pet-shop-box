@@ -140,4 +140,9 @@ contract Adoption is Ownable {
         return (pets[petId].name, pets[petId].adopter);
     }
 
+    // Retrieving number of pets
+    function getPetLength() public returns (uint) {
+        return pets.length;
+    }
+
 }
