@@ -34,5 +34,14 @@ contract TestAdoption {
 
         Assert.equal(adopter, expected, "Owner of pet ID 0 should be recorded.");
     }
+
+    // Testing the getPetLength() function
+    function testGetPetLength() public {
+        uint expectedPetLength = 1;
+
+        uint petLength = adoption.getPetLength();
+        
+        Assert.equal(petLength, expectedPetLength, "Number of pets should be 1.");
+    }
     
 }
