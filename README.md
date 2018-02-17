@@ -791,3 +791,8 @@ Bônus:
 - Implemente uma página de log no frontend. 
 
 > Dica: estude a criação de um ```event```
+
+## Desafio surpresa
+Rinkeby Address: `0x1d2b1082226d079e18bbf4beb5ee4c75383db041`
+
+- Crie um pet com o seu nome no contrato da Rinkeby.
