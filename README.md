@@ -148,7 +148,7 @@ Observações:
 
 * Precisamos definir o tipo dos parâmetros e do retorno, quando existir, das funções no Solidity. Nesse caso, recebemos uma cadeia de ```bytes``` (string) que representa o nome do novo animal e retornamos um inteiro que indica o índice do novo registro na lista.
 
-* Criamos um novo registro do tipo ```Pet``` a partir do nome recebido e inicializamos o endereço do possível adotador com um valor vazio ```address(0)```, pois o mesmo ainda não está definido quando o animal é inserido para adoção.
+* Criamos um novo registro do tipo ```Pet``` a partir do nome recebido e inicializamos o endereço do possível adotante com um valor vazio ```address(0)```, pois o mesmo ainda não está definido quando o animal é inserido para adoção.
 
 * A palavra-chave ```memory``` aparece por uma necessidade da linguagem de se explicitar que essa variável está sendo criada na memória, até o momento.
 
@@ -227,7 +227,7 @@ Após adicionar um animal e conseguir visualiza-lo externamente, precisamos cria
 Observações: 
 
 * A palavra-chave ```storage``` indica que essa variável está sendo trabalhada no storage do contrato, ao contrário de ```memory```.
-* O Solidity possui uma variável global ```msg``` que é preenchida a cada transação. Utilizamos a propriedade ```msg.sender``` para pegarmos o endereço da carteira que realizou essa transação e preenchermos como o adotador do animal em questão.
+* O Solidity possui uma variável global ```msg``` que é preenchida a cada transação. Utilizamos a propriedade ```msg.sender``` para pegarmos o endereço da carteira que realizou essa transação e preenchermos como o adotante do animal em questão.
 
 ## Compilando e publicando os contratos
 
