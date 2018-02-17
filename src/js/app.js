@@ -47,6 +47,7 @@ App = {
               petTemplate.find('img').attr('src', images[Math.floor(Math.random() * images.length)]);
               petTemplate.find('.btn-adopt').attr('data-id', i);
               petTemplate.find('.btn-accept').attr('data-id', i);
+              petTemplate.find('.btn-refuse').attr('data-id', i);
               petTemplate.find('#adoptionValue').attr('unique-id', i);
               petTemplate.find('#adoptionValue').css('display', 'none');
               
