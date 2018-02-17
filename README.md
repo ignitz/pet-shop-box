@@ -302,6 +302,7 @@ Ao lado do nome de cada contrato temos o endereço dele na rede.
 
 Agora que temos nosso contrato disponível na blockchain, é o momento de interagirmos com ele.
 
+
 ## Testando o contrato
 
 O Truffle é bastante flexível no que se refere aos testes de smart contracts. O desenvolvedor é livre para criar os testes em JavaScript ou na própria linguagem Solidity. Nesse tutorial escreveremos os testes em Solidity.
@@ -314,19 +315,24 @@ pragma solidity ^0.4.17;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
+import "./ThrowProxy.sol";
 import "../contracts/Adoption.sol";
 
+
 contract TestAdoption {
-  Adoption adoption = Adoption(DeployedAddresses.Adoption());
+    Adoption adoption = Adoption(DeployedAddresses.Adoption());
+    ThrowProxy throwProxy = new ThrowProxy(address(adoption)); 
+    Adoption throwableAdoption = Adoption(address(throwProxy));
 }
 ```
-Assim, iniciamos o contrato com três importantes importações:
+Assim, iniciamos o contrato com quatro importantes importações:
 
 * ```Assert.sol```: Provê funções para testes de igualdade, desigualdade ou retornos errôneos. [Aqui](https://github.com/trufflesuite/truffle-core/blob/master/lib/testing/Assert.sol) você pode consultar a lista completa de funções para teste incluidas no Truffle.
 * ```DeployedAddresses.sol```: Quando rodamos os testes, o  Truffle publica temporariamente os contratos na blockchain. Esse contrato é responsável por armazenar os endereços desses contratos no ambiente de teste.
+* ```ThrowProxy.sol```: Por enquanto não conseguimos capturar exceções lançadas na linguagem Solidity. Entretanto, utilizando o contrato ThrowProxy, já fornecido na pasta ```test/```, conseguimos verificar quando uma função chamada através dele foi executada ou não. Para um melhor entendimento dessa solução em outro momento, acesse esse [tutorial](http://truffleframework.com/tutorials/testing-for-throws-in-solidity-tests)
 * ```Adoption.sol```: O Contrato que será testado.
 
-No escopo do contrato ```TestAdoption``` estamos instanciando um contrato ```Adoption``` e inserindo o endereço da instância de teste do mesmo.
+No escopo do contrato ```TestAdoption``` utilizaremos a instância ```adoption``` para testarmos o sucesso das funções e ```throwableAdoption``` para testarmos as falhas.
 
 Observação:
 
@@ -334,11 +340,109 @@ Observação:
 
 ### Testando a função: addPet
 
+1. Adicione o código que segue após as declarações iniciais do contrato ```TestAdoption```
+```
+// Testing the addPet() function
+  function testUserCanAddPet() public {
+    uint returnedId = adoption.addPet("Dog Test");
+    uint expected = 0;
+    Assert.equal(returnedId, expected, "pet ID 0 should be recorded.");
+  }
+```
+Observações:
+
+* Nesse teste criamos um animal de nome "Dog Test" 
+* Então, esperamos que esse novo animal seja o primeiro da lista.
+
 ### Testando a função: getNumberOfPets
+
+1. Adicione o código que segue ao final do contrato ```TestAdoption```
+```
+ // Testing the getNumberOfPets() function
+    function testUserCanGetTheNumberOfPets () public {
+        uint expectedPetLength = 1;
+        uint petLength = adoption.getNumberOfPets();
+        Assert.equal(petLength, expectedPetLength, "Number of pets should be 1.");
+    }
+```
+Observações:
+
+* Nesse teste buscamos o número de animais existentes para adoção.
+* Então, esperamos que só exista um animal na lista.
 
 ### Testando a função: getPet
 
+1. Adicione o código que segue ao final do contrato ```TestAdoption``` para o teste
+de busca de um animal válido.
+```
+  // Testing the getPet() function
+  function testUserCanGetPet() public {
+    // Expected adopter is null
+    address expectedAdopter = address(0);
+    var (,adopter) = adoption.getPet(0);
+    Assert.equal(adopter, expectedAdopter, "Adopter of pet ID 0 should be empty.");
+  }
+```
+
+Observações:
+
+* Nesse teste buscamos o primeiro animal da lista.
+* Então, esperamos que esse animal ainda não tenha sido adotado.
+* Podemos fazer referências a tuplas omitindo variáveis que não desejamos, como em
+```
+var (,adopter) = adoption.getPet(0);
+```
+
+2. Adicione o código que segue ao final do contrato ```TestAdoption``` para o teste
+de busca de um animal inválido.
+```
+  // Testing invalid retrieval of a pet
+  function testUserCannotGetAnInvalidPet() public {
+    throwableAdoption.getPet(1);
+    throwProxy.shouldThrow();
+  }
+```
+
+Observações:
+
+* Nesse teste buscamos o segundo animal da lista.
+* Então, esperamos que essa função dispare uma exceção pois esse animal não existe.
+
 ### Testando a função: adopt
+1. Adicione o código que segue ao final do contrato ```TestAdoption``` para o teste
+de adoção de um animal válido.
+```
+  // Testing the adopt() function
+  function testUserCanAdoptPet() public {
+    uint returnedId = adoption.adopt(0);
+    uint expectedId = 0;
+    address expectedAdopter = this;
+    Assert.equal(returnedId, expectedId, "Adoption of pet ID 0 should be recorded.");
+    var (,adopter) = adoption.getPet(0);
+    Assert.equal(adopter, expectedAdopter, "Adopter of pet ID 0 should be the TestAdoption contract.");
+  }
+```
+
+Observações:
+
+* Nesse teste adotamos o primeiro animal da lista.
+* Então, esperamos que o animal adotado ao final do processo seja o mesmo.
+* Quando um contrato executa uma chamada de alto nível a outro contrato, a variável global ```msg``` também é alterada, ou seja, o ```msg.sender``` desse teste é o endereço do próprio contrato ```TestAdoption```. Isso torna o ```TestAdoption``` o adotante do animal.
+
+2. Adicione o código que segue ao final do contrato ```TestAdoption``` para o teste
+de adoção de um animal inválido.
+```
+  // Testing invalid adoption 
+  function testUserCannotAdoptAnInvalidPet() public {
+    throwableAdoption.adopt(1);
+    throwProxy.shouldThrow();
+  }
+```
+Observações:
+
+* Nesse teste adotamos o segundo animal da lista.
+* Então, esperamos que essa função dispare uma exceção pois esse animal não existe.
+
 
 ### Executando os testes
 
