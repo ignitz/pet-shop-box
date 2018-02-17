@@ -104,7 +104,7 @@ contract Adoption {
 ```
 Observações:
 
-* A versão mínima requerida do Solidity é descrita no ínicio do contrato: ```pragma solidity ^0.4.17;```. A palavra-chave ```pragma``` signfifica "informação adicional que importa somente ao compilador", enquanto o símbolo ```^``` significa "A versão indicada ou superior".
+* A versão mínima requerida do Solidity é descrita no ínicio do contrato: ```pragma solidity ^0.4.17;```. A palavra-chave ```pragma``` significa "informação adicional que importa somente ao compilador", enquanto o símbolo ```^``` significa "A versão indicada ou superior".
 * Assim como em outras linguagens, a sintaxe exige ```;``` ao final de cada comando.
 
 #### Criando variáveis
@@ -158,7 +158,7 @@ Observações:
 
 Como já foi dito ao definirmos nossa lista de animais, só conseguimos acessar os itens individualmente. Dessa forma, incluiremos uma função para saber o tamanho da nossa lista e facilitar futuros controles através da aplicação cliente.
 
-1. Adicione a seguinte função abaixo de ```addPet``, definida no passo anterior
+1. Adicione a seguinte função abaixo de ```addPet```, definida no passo anterior
 ```
     // Retrieving number of pets
     function getNumberOfPets() public view returns (uint) {
