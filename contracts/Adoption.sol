@@ -103,8 +103,10 @@ contract Adoption is Ownable {
         returns (uint)
     {
         Pet storage pet = pets[petId];
+        uint256 donation = pet.donation;
+        address petOwner = this.owner();
         if (pet.donation > uint256(0)) {
-            owner.transfer(pet.donation);
+            petOwner.transfer(donation);
         }
         pet.status = Status.ADOPTED;
         pets[petId] = pet;
@@ -120,8 +122,10 @@ contract Adoption is Ownable {
         returns (uint)
     {
         Pet storage pet = pets[petId];
+        address adopter = pet.adopter;
+        uint256 donation = pet.donation;
         if (pet.donation > uint256(0)) {
-            pet.adopter.transfer(pet.donation);
+            adopter.transfer(donation);
             pet.donation = uint256(0);
         }
         pet.adopter = address(0);
