@@ -16,6 +16,15 @@
     - [Criando nosso primeiro modificador de funções](#criando-nosso-primeiro-modificador-de-fun%C3%A7%C3%B5es)
     - [Criando nossa terceira função: Retornar os dados de um animal](#criando-nossa-terceira-fun%C3%A7%C3%A3o-retornar-os-dados-de-um-animal)
     - [Criando nossa quarta função: Adotar um animal](#criando-nossa-quarta-fun%C3%A7%C3%A3o-adotar-um-animal)
+- [Compilando e publicando os contratos](#compilando-e-publicando-os-contratos)
+  - [Compilando o contrato](#compilando-o-contrato)
+  - [Publicando o contrato](#publicando-o-contrato)
+- [Testando o contrato](#testando-o-contrato)
+  - [Testando a função: addPet](#testando-a-fun%C3%A7%C3%A3o-addpet)
+  - [Testando a função: getNumberOfPets](#testando-a-fun%C3%A7%C3%A3o-getnumberofpets)
+  - [Testando a função: getPet](#testando-a-fun%C3%A7%C3%A3o-getpet)
+  - [Testando a função: adopt](#testando-a-fun%C3%A7%C3%A3o-adopt)
+  - [Executando os testes](#executando-os-testes)
 - [Criando uma interface para interagir com o smart contract](#criando-uma-interface-para-interagir-com-o-smart-contract)
   - [Instanciando o web3](#instanciando-o-web3)
   - [Instanciando o contrato](#instanciando-o-contrato)
@@ -26,6 +35,10 @@
   - [Instalando e configurando o MetaMask](#instalando-e-configurando-o-metamask)
 - [Iniciando o servidor http local](#iniciando-o-servidor-http-local)
 - [Usando o dapp](#usando-o-dapp)
+- [Parte final](#parte-final)
+  - [Desafio 1](#desafio-1)
+  - [Desafio 2](#desafio-2)
+  - [Desafio 3](#desafio-3)
 
   
 ## Introdução
@@ -56,6 +69,11 @@ Para verificar se o Truffle está instalado corretamente, digite ``` truffle ver
 Utilizaremos também a Ganache, uma blockchain privada que permite a publicação dos nossos contratos em ambiente de desenvolvimento e dará suporte para o uso e teste da nossa aplicação. Faça o download da mesma em http://truffleframework.com/ganache.
 
 ## Desenvolvimento
+
+Primeiramente, navegue até a pasta raiz do projeto e instale as dependências locais com
+```
+npm install
+```
 
 ### Estrutura de pastas
 
@@ -285,6 +303,73 @@ Ao lado do nome de cada contrato temos o endereço dele na rede.
 Agora que temos nosso contrato disponível na blockchain, é o momento de interagirmos com ele.
 
 ## Testando o contrato
+
+O Truffle é bastante flexível no que se refere aos testes de smart contracts. O desenvolvedor é livre para criar os testes em JavaScript ou na própria linguagem Solidity. Nesse tutorial escreveremos os testes em Solidity.
+
+1. Navegue até a pasta ```test/``` e crie um arquivo de nome ```TestAdoption.sol```
+
+2. Adicione o código abaixo no arquivo criado
+```
+pragma solidity ^0.4.17;
+
+import "truffle/Assert.sol";
+import "truffle/DeployedAddresses.sol";
+import "../contracts/Adoption.sol";
+
+contract TestAdoption {
+  Adoption adoption = Adoption(DeployedAddresses.Adoption());
+}
+```
+Assim, iniciamos o contrato com três importantes importações:
+
+* ```Assert.sol```: Provê funções para testes de igualdade, desigualdade ou retornos errôneos. [Aqui](https://github.com/trufflesuite/truffle-core/blob/master/lib/testing/Assert.sol) você pode consultar a lista completa de funções para teste incluidas no Truffle.
+* ```DeployedAddresses.sol```: Quando rodamos os testes, o  Truffle publica temporariamente os contratos na blockchain. Esse contrato é responsável por armazenar os endereços desses contratos no ambiente de teste.
+* ```Adoption.sol```: O Contrato que será testado.
+
+No escopo do contrato ```TestAdoption``` estamos instanciando um contrato ```Adoption``` e inserindo o endereço da instância de teste do mesmo.
+
+Observação:
+
+* O caminho ```trufle/<contract>.sol``` refere-se à dependência instalada no momento de configuração do ambiente, portanto, não crie uma pasta ```truffle/``` dentro do diretório de testes ```test/```
+
+### Testando a função: addPet
+
+### Testando a função: getNumberOfPets
+
+### Testando a função: getPet
+
+### Testando a função: adopt
+
+### Executando os testes
+
+Semelhante aos procedimentos ```compile``` e ```migrate```, utilizaremos o comando
+```test``` fornecido pelo Truffle para rodarmos os testes.
+
+1. Navegue até a pasta raiz do projeto e execute 
+```
+truffle test
+```
+
+2. Se todos os testes passarem, você verá um resultado similar ao que segue
+```
+Using network 'development'.
+
+   Compiling ./contracts/Adoption.sol...
+   Compiling ./test/TestAdoption.sol...
+   Compiling truffle/Assert.sol...
+   Compiling truffle/DeployedAddresses.sol...
+
+     TestAdoption
+       ✓ testUserCanAddPet (50ms)
+       ✓ testUserCanGetTheNumberOfPets (50ms)
+       ✓ testUserCanGetPet (50ms)
+       ✓ testUserCanAdoptPet (50ms)
+       ✓ testUserCannotGetAnInvalidPet (50ms)
+       ✓ testUserCannotAdoptAnInvalidPet (50ms)
+
+
+     6 passing (300ms)
+```
 
 
 ## Criando uma interface para interagir com o smart contract
@@ -575,7 +660,7 @@ Cuidar de animais não é barato... há gastos com veterinário, comida, etc. Po
 
 Funções envolvendo transferência de Ether são muito importantes, por isso, tente criar essa nova funcionalidade!
 
->Dica: utilize uma função payable
+>Dica: estude o modificador ```payable```
 
 ### Desafio 2
 Implemente a funcionalidade de aceitar/recusar a adoção de um pet.
@@ -591,10 +676,12 @@ Observações:
 - Um pet não pode ser adotado duas vezes.
 - Somente o dono do petshop pode adicionar pet e aceitar/recusar as adoções.
 
+>Dica: estude a definição de uma lista enumerável ```enum```
+
 ### Desafio 3
 Implemente um log de adoções no smart contract. Toda vez que um pet for adotado emita um evento que poderá ser lido no frontend.
 
 Bônus:
 - Implemente uma página de log no frontend. 
 
-> Dica: utilize event no solidity
+> Dica: estude a criação de um ```event```
