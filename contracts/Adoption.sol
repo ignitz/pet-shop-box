@@ -3,7 +3,14 @@ pragma solidity ^0.4.17;
 import "./Ownable.sol";
 
 contract Adoption is Ownable {
-    
+
+    event AdoptedPet (
+        uint id,
+        bytes name,
+        address adopter,
+        uint donation
+    );
+
     Pet[] pets;
 
     address owner;
@@ -56,7 +63,7 @@ contract Adoption is Ownable {
         pets[petId] = pet;
         return petId;
     }
-   
+
     // activate an inactive pet
     function activatePet(uint petId)
         onlyOwner
@@ -110,6 +117,8 @@ contract Adoption is Ownable {
         }
         pet.status = Status.ADOPTED;
         pets[petId] = pet;
+
+        AdoptedPet(petId, pet.name, pet.adopter, pet.donation);
         return petId;
     }
 

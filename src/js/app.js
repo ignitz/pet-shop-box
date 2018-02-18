@@ -2,13 +2,31 @@ Status = {
   INACTIVE: 0,
   AVAILABLE: 1,
   PENDING_ADOPTION: 2,
-  ADOPTED: 3  
+  ADOPTED: 3
 };
 
 App = {
   web3Provider: null,
   web3: null,
   contracts: {},
+
+  watchAdopted: function() {
+      App.contracts.Adoption.deployed().then(function(instance) {
+          let AdoptedPetEvent = instance.AdoptedPet({}, {fromBlock: 0, toBlock: 'latest'});
+          AdoptedPetEvent.watch(function(err, result){
+              args = result.args;
+
+              id = args.id;
+              adopter = args.adopter;
+              name = web3.toAscii(args.name);
+              donation = web3.fromWei(args.donation.toNumber());
+
+              $('#adoptionLogTable > tbody:last-child').prepend(
+                  '<tr><td>' + id + '</td><td>' + name + '</td><td><a href="#">' + adopter +'</a></td><td>' + donation + ' ETH</td></tr>'
+              )
+          });
+      });
+  },
 
   loadPets: function() {
     // Load pets.
@@ -20,7 +38,7 @@ App = {
       "images/boxer.jpeg",
       "images/golden-retriever.jpeg"
     ];
-    
+
     var adoptionInstance;
     App.contracts.Adoption.deployed().then(function(instance) {
       adoptionInstance = instance;
@@ -28,14 +46,14 @@ App = {
     }).then(function(result) {
       var petLength = result.toNumber();
       var promises = [];
-    
+
       for(i = 0; i < petLength; i++){
         promises.push(adoptionInstance.getPet.call(i))
       }
 
-          
+
       App.web3.eth.getAccounts(function(error, accounts) {
-        adoptionInstance.owner.call().then(function(owner) {          
+        adoptionInstance.owner.call().then(function(owner) {
 
           Promise.all(promises).then(function(result){
             var petsRow = $('#petsRow');
@@ -50,7 +68,7 @@ App = {
               petTemplate.find('.btn-refuse').attr('data-id', i);
               petTemplate.find('#adoptionValue').attr('unique-id', i);
               petTemplate.find('#adoptionValue').css('display', 'none');
-              
+
               switch(result[i][1].toNumber()) {
                 case Status.INACTIVE:
                   petTemplate.find('.btn-adopt').text('Inactive').attr('disabled', true);
@@ -66,15 +84,15 @@ App = {
                   petTemplate.find('.btn-adopt').text('Adopted').attr('disabled', true);
                 break;
               };
-              
+
               if(accounts[0] == owner && result[i][1].toNumber() == Status.PENDING_ADOPTION) {
                 petTemplate.find('.btn-accept').css('display', 'inline');
                 petTemplate.find('.btn-refuse').css('display', 'inline');
                 petTemplate.find('.btn-adopt').css('display', 'none');
               } else {
-                petTemplate.find('.btn-accept').css('display', 'none');              
-                petTemplate.find('.btn-refuse').css('display', 'none');              
-                petTemplate.find('.btn-adopt').css('display', 'inline');              
+                petTemplate.find('.btn-accept').css('display', 'none');
+                petTemplate.find('.btn-refuse').css('display', 'none');
+                petTemplate.find('.btn-adopt').css('display', 'inline');
               }
 
               petsRow.append(petTemplate.html());
@@ -89,7 +107,6 @@ App = {
   },
 
   initWeb3: function() {
-
     // Is there an injected web3 instance?
     if (typeof web3 !== 'undefined') {
       App.web3Provider = web3.currentProvider;
@@ -112,6 +129,9 @@ App = {
       // Set the provider for our contract
       App.contracts.Adoption.setProvider(App.web3Provider);
 
+      // Setup watcher for adopted pets
+      App.watchAdopted();
+
       // Use our contract to retrieve and mark the adopted pets
       return App.loadPets();
     });
@@ -128,8 +148,8 @@ App = {
 
   acceptAdoption: function(event) {
     event.preventDefault();
-    
-    var petId = parseInt($(event.target).data('id'));    
+
+    var petId = parseInt($(event.target).data('id'));
 
     var adoptionInstance;
 
@@ -155,8 +175,8 @@ App = {
 
   refuseAdoption: function(event) {
     event.preventDefault();
-    
-    var petId = parseInt($(event.target).data('id'));    
+
+    var petId = parseInt($(event.target).data('id'));
 
     var adoptionInstance;
 
