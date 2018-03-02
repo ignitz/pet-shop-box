@@ -74,7 +74,7 @@ Primeiramente, utilize o Git para clonar este repositório em sua máquina, na p
 ```
 git clone git@github.com:SwapyNetwork/pet-shop-box.git
 ```
-Nvegue até a pasta raiz do projeto e instale as dependências locais com
+Navegue até a pasta raiz do projeto e instale as dependências locais com
 ```
 npm install
 ```
