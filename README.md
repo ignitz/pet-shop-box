@@ -70,7 +70,11 @@ Utilizaremos também a Ganache, uma blockchain privada que permite a publicaçã
 
 ## Desenvolvimento
 
-Primeiramente, navegue até a pasta raiz do projeto e instale as dependências locais com
+Primeiramente, utilize o Git para clonar este repositório em sua máquina, na pasta que desejar
+```
+git clone git@github.com:SwapyNetwork/pet-shop-box.git
+```
+Nvegue até a pasta raiz do projeto e instale as dependências locais com
 ```
 npm install
 ```
@@ -273,7 +277,7 @@ Certifique-se que ela está instalada em sua máquina e dê um clique duplo em s
 5. Voltando ao terminal, digite o comando
 
 ```
-truffle migrate
+truffle migrate --reset
 ```
 O resultado deve ser parecido com o que segue
 ```
