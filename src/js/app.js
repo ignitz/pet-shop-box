@@ -1,3 +1,9 @@
+var EstadoPet = {
+  "NOT_ADOPTED":"NOT_ADOPTED",
+  "WAITING_TO_ADOPT":"WAITING_TO_ADOPT",
+  "ADOPTED":"ADOPTED"};
+Object.freeze(EstadoPet);
+
 App = {
   web3Provider : null,
   web3 : null,
@@ -41,12 +47,13 @@ App = {
   },
 
   bindEvents : function() {
-    $(document).on('click', '.btn-adopt', App.adopt);
+    $(document).on('click', '#donate-pet', App.adopt);
     $(document).on('click', '#add-pet', App.addPet);
   },
 
   loadPets : function() {
     var adoptionInstance;
+    console.log("Your wallet is " + String(App.web3.eth.coinbase));
     App.contracts.Adoption.deployed()
         .then(function(instance) {
           adoptionInstance = instance;
@@ -77,14 +84,29 @@ App = {
                     'src',
                     App.images[Math.floor(Math.random() * App.images.length)]);
                 petTemplate.find('.btn-adopt').attr('data-id', i);
-                result[i][1] != '0x0000000000000000000000000000000000000000'
-                    ? petTemplate.find('.btn-adopt')
-                          .text('Adopted')
-                          .attr('disabled', true)
-                    : petTemplate.find('.btn-adopt')
+                console.log(result[i]);
+                if (String(App.web3.eth.coinbase) == result[i][1]) {
+                  petTemplate.find('.btn-adopt')
+                        .text('It\'s yours')
+                        .attr('disabled', true);
+                }
+                else {
+                  if (result[i][2] == EstadoPet.NOT_ADOPTED) {
+                    petTemplate.find('.btn-adopt')
                           .text('Adopt')
                           .attr('disabled', false);
-
+                  }
+                  else if (result[i][2] == EstadoPet.WAITING_TO_ADOPT) {
+                    petTemplate.find('.btn-adopt')
+                          .text('Waiting answer')
+                          .attr('disabled', true);
+                  }
+                  else {
+                    petTemplate.find('.btn-adopt')
+                          .text('Adopted')
+                          .attr('disabled', true);
+                  }
+                }
                 petsRow.append(petTemplate.html());
               }
             });
@@ -97,10 +119,6 @@ App = {
   },
 
   addPet : function(event) {
-    /*
-     * Substitua esse bloco de comentário
-     */
-
     event.stopPropagation();
     var petName = $('#petName').val();
 
@@ -127,11 +145,9 @@ App = {
   },
 
   adopt : function(event) {
-    /*
-     * Substitua esse bloco de comentário
-     */
-
     event.preventDefault();
+    var donateValue = $('#donate').val();
+    $('#donatePetModal').modal('hide');
 
     var petId = parseInt($(event.target).data('id'));
 
@@ -140,15 +156,19 @@ App = {
         console.log(error);
       }
 
-      var account = accounts[0];
+      var toSend = '0x193ec362b5040712347c7a44910b6011c95c3b4d';
+      console.log(toSend);
 
       App.contracts.Adoption.deployed()
           .then(function(instance) {
             adoptionInstance = instance;
-
-            return adoptionInstance.adopt(petId, {from : account});
+            // let data = {from: accounts[0], to: toSend, value: web3.toWei(donateValue, "ether")}
+            let data = {from: accounts[0]};
+            console.log(data);
+            return adoptionInstance.adopt(petId, data);
           })
           .then(function(result) {
+            console.log(result);
             setTimeout(function() { return App.loadPets(); }, 2000);
           })
           .catch(function(err) { console.log(err.message); });
